@@ -1,0 +1,181 @@
+<html><head>
+	<title>MyChat</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+	<script src="sillyclient.js"></script>
+</head>
+<body>
+<h1>CHAT2</h1>
+
+<div class="input_area">
+	<input type="text"><button>Send</button>
+</div>
+<div class="msgs"><div class="msg system"><span class="username"></span><span class="content">connected</span></div><div class="msg system"><span class="username"></span><span class="content">user connected: 2980</span></div><div class="msg"><span class="username">defined</span><span class="content">test</span></div></div>
+
+<div id="templates" style="display: none">
+	<div class="msg"><span class="username"></span><span class="content"></span></div>
+</div>	
+
+<style>
+body {
+	font-family: 'Raleway', sans-serif;
+}
+
+.input_area {
+	margin: 4px;
+}
+
+input {
+	font-size: 1.2em;
+	padding: 4px;
+	width: 85%;
+	border: 1px solid #DDD;
+	border-radius: 4px 0 0 4px;
+}
+
+button {
+	width: 15%;
+	font-size: 1.2em;
+	padding: 4px;
+	background-color: #78a980;
+	border: 1px solid #78a980;
+	color: white;
+	border-radius: 0 4px 4px 0;
+}
+
+.msg {
+	border-radius: 4px;
+	background-color: #effbf1;
+	padding: 4px;
+	margin-bottom: 4px;
+	color: #111;
+}
+
+.system {
+	background-color: #FFF;
+	color: #555;
+}
+
+.msg .username {
+	color: #4e9c4d;
+	margin-right: 5px;
+}
+
+.msgs {
+	height: calc(100% - 150px);
+	overflow: auto;
+}
+
+textarea:focus, input:focus{
+    outline: none;
+}
+
+</style>
+	
+<script>
+
+var channel = "CHAT2";
+document.querySelector("h1").innerHTML = channel;
+
+function request(url, callback)
+{
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function(e) { //callback to handle the response
+		//this code will be executed when the response is complete
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			var data = xmlhttp.responseText; //here is the response as sent by the serverÃ§
+			var headers = this.getAllResponseHeaders();
+			if( headers.indexOf("application/json") != -1 )
+				data = JSON.parse( data );
+			callback(data);
+		}
+	};
+	xmlhttp.open("GET", url, true);
+	xmlhttp.send(); //sends the request to the server
+	return xmlhttp;
+}
+
+
+var client = new SillyClient();
+client.connect( "84.89.136.194:9000", channel );
+
+client.on_ready = function( author_id ){
+	showMessage("", "connected","system" );
+}
+
+client.on_error  = function( author_id ){
+	showMessage("", "not connected","system" );
+}
+
+
+client.on_user_connected  = function( author_id ){
+	
+	showMessage("", "user connected: " + author_id,"system" );
+}
+
+client.on_user_disconnected  = function( author_id ){
+	
+	showMessage("", "user disconnected: " + author_id, "system" );
+}
+
+client.on_message = function( author_id, data ){
+	
+	var data = JSON.parse(data);
+	
+	if(data.type == "message")
+		showMessage(data.username, data.content );
+}
+
+function showMessage(username, content, className )
+{
+	var template = document.querySelector("#templates .msg");
+	var elem = template.cloneNode(true);
+	elem.querySelector(".username").innerText = username;
+	elem.querySelector(".content").innerText = content;
+	var root = document.querySelector(".msgs");
+	if(className)
+		elem.classList.add(className);
+	root.appendChild( elem );
+	root.scrollTop = 1000000;
+}
+
+
+var input = document.querySelector("input");
+input.addEventListener("keydown", function(e){
+	if(e.keyCode != 13)
+		return;
+	onSendMessage(e);
+});
+
+function onSendMessage(e)
+{
+	if(!input.value)
+		return;
+	var data_json = {
+		type: "message",
+		username: "system",
+		content: input.value
+	};
+	showMessage(data_json.username, data_json.content );
+	client.sendMessage( JSON.stringify( data_json ) );
+	input.value = "";
+}
+
+var button = document.querySelector("button");
+button.addEventListener("click", onSendMessage);
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body></html>

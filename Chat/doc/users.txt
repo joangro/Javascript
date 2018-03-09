@@ -1,0 +1,1 @@
+{username: "name", id: 0, color: "#000000", avatar: "none"};
