@@ -14,20 +14,16 @@ function GFX(){
 
 GFX.prototype.init = function () {
 	
-	this.initCamera();
-	
 	this.initScene();
-	
 	this.initSkyBox();
-	
 	this.initRender();
-	
+	this.initCamera();
 	this.initLight();
+
 }
 
 GFX.prototype.initCamera = function (){
-	GFX.canvasDiv = document.getElementById("myScene");
-	this.camera = new THREE.PerspectiveCamera( 45, GFX.canvasDiv.offsetWidth / GFX.canvasDiv.offsetHeight , 1, 20000 );
+	this.camera = new THREE.PerspectiveCamera( 45, this.container.offsetWidth / this.container.offsetHeight , 1, 20000 );
 	this.camera.position.x = this.worldCenter;
 	this.camera.position.y = this.worldCenter;
 	this.camera.position.z = this.worldCenter;
@@ -36,6 +32,7 @@ GFX.prototype.initCamera = function (){
 
 GFX.prototype.initScene = function (){
 	this.scene = new THREE.Scene();
+	this.container = document.getElementById("myScene");
 
 }
 
@@ -61,9 +58,9 @@ GFX.prototype.initSkyBox = function (){
 GFX.prototype.initRender = function (){
 	this.render = new THREE.WebGLRenderer();
 	this.render.setPixelRatio( window.devicePixelRatio );
-	this.render.setSize( GFX.canvasDiv.offsetWidth, GFX.canvasDiv.offsetHeight);
-	document.getElementById("myScene").appendChild( this.render.domElement );
-
+	//this.render.setSize( $("#myScene").width(), $("#myScene").height());
+	this.render.setSize( this.container.offsetWidth, this.container.offsetHeight);
+	this.container.appendChild( this.render.domElement );
 }
 
 GFX.prototype.initLight = function (){
@@ -77,10 +74,10 @@ GFX.prototype.initLight = function (){
 
 
 function onWindowResize() {
-	this.container = document.getElementById('myScene');
-	this.camera.aspect = this.container.innerWidth / this.container.innerHeight;
-	this.camera.updateProjectionMatrix();
-	this.renderer.setSize( container.innerWidth, container.innerHeight );
+	var spaceLeft = 1;
+	GFX.camera.aspect = window.innerWidth*spaceLeft / window.innerHeight*spaceLeft;
+	GFX.camera.updateProjectionMatrix();
+	GFX.render.setSize( window.innerWidth*spaceLeft, window.innerHeight*spaceLeft );
 }
 
 window.addEventListener( 'resize', onWindowResize, false );
